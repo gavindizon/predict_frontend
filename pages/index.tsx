@@ -6,13 +6,31 @@ import data from "../utils/questions.json";
 import { useState } from "react";
 import { axiosInstance as axios } from "../config/axios.config";
 
-const Home: NextPage<Props> = () => {
+interface QuestionValues {
+    [key: string]: number;
+    "Strongly Disagree": number;
+    Disagree: number;
+    Neutral: number;
+    Agree: number;
+    "Strongly Agree": number;
+}
+
+interface ResultExplanations {
+    [key: number]: string;
+    0: string;
+    1: string;
+    2: string;
+    3: string;
+    4: string;
+}
+
+const Home: NextPage = () => {
     const [hasResult, setHasResult] = useState(false);
     const [loading, setLoading] = useState(false);
     const [values, setValues] = useState(Array(50).fill(0.0));
     const [cluster, setCluster] = useState(-1);
 
-    const questionValues = {
+    const questionValues: QuestionValues = {
         "Strongly Disagree": -2.0,
         Disagree: -1.0,
         Neutral: 0.0,
@@ -20,27 +38,19 @@ const Home: NextPage<Props> = () => {
         "Strongly Agree": 2.0,
     };
 
-    const resultExplanation = {
-        0: "",
-        1: "",
-        2: "",
-        3: "",
-        4: "",
+    const resultExplanation: ResultExplanations = {
+        0: "They lean more positively towards Extroversion. Responses in this cluster tend to be relatively negative when it comes to Agreeableness and Openness but also is the most negative when it comes to conscientiousness and emotional stability.",
+        1: "They are most positively aligned towards Extroversion and relatively positive towards Conscientiousness. Responses in this cluster also has the most negative alignment towards emotional stability while being relatively negative in Agreeableness and Openness.",
+        2: "They lean relatively positive towards extroversion and emotional tability. Cluster 2 is also the only cluster with responses aligning more positively towards Agreeableness. The responses in this cluster has a relatively negative alignmment towards openness and conscientiousness",
+        3: "They lean most positively toward emotional stability while generally having the most negative alignment towards Agreeableness and Extroversion. Responses in the cluster also has a relatively negative alignment towards Conscientiousness and Openness.",
+        4: "They generally align well towards emotional stability. Responses in this cluster also has the highest alignment towards Conscientiousness while having relatively negative responses to Extroversion, Agreeableness, and Openness.",
     };
 
     const onSubmit = async () => {
         try {
             setLoading(true);
-
-            console.log(values.length);
             const data = { data: values };
-            //let a = await axios.get("/");
-            //console.log(a);
             let res = await axios.post("/predict", data);
-            // fetch("https://model-predictor-kmeans.herokuapp.com/predict", {
-            //     method: "POST",
-            //     body: { data: values },
-            // });
             setCluster(res.data);
             console.log(res);
         } catch (e) {
@@ -97,7 +107,7 @@ const Home: NextPage<Props> = () => {
                                                     newValues[index] = parseFloat(e.target.value);
                                                     setValues(newValues);
                                                 }}
-                                                checked={parseFloat(questionValues[key]) === parseFloat(values[index])}
+                                                checked={questionValues[key] === parseFloat(values[index])}
                                             />
                                             <label>{key}</label>
                                         </div>
@@ -125,11 +135,7 @@ const Home: NextPage<Props> = () => {
                             <span className="font-bold mt-2">Result:</span>
                             <div className="shadow-md rounded-md w-[512px] h-72 mt-4 text-center mx-auto p-2 ">
                                 <h3 className="font-bold text-2xl mb-2">You are from Cluster {cluster}</h3>
-                                <p className="w-">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Cumque, atque? Sapiente ex
-                                    iure ratione. In facilis, odit, illum omnis delectus ipsum quos ea dignissimos
-                                    laudantium dolor nulla esse reprehenderit similique!
-                                </p>
+                                <p className="">{resultExplanation[cluster]}</p>
                             </div>
                         </>
                     )}
